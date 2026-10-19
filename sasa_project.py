@@ -1,38 +1,70 @@
 import requests
 
-def quiz():
-  response_all = requests.get('https://api.periodictableofelements.org/elements/')
-  elements = response_all.json()
-  response = requests.get('https://api.periodictableofelements.org/elements/quiz/')
-  quizly = response.json()
-  print(f'Успешно загрузил {len(elements)} элементов.')
-  print(f'Успешно загрузил {len(quizly)} приблизительных ответов.')
-  print("Начинаю квест...")
 
-  symbol = quizly["type"]
+class APIPeriodical:
+
+  def all_respone(self):
+    response_all = requests.get('https://api.periodictableofelements.org/elements/')
+    elements = response_all.json()
+
+    return elements
+
+  def quiz_response(self):
+    response_quiz = requests.get('https://api.periodictableofelements.org/elements/quiz/')
+    quizly = response_quiz.json()
+
+    return quizly
+
+  def daily_element(self):
+    response_daily = requests.get('https://api.periodictableofelements.org/elements/element-of-the-day/')
+    day_element = response_daily.json()
+
+    return day_element
+
+
+
+def quiz():
+  api = APIPeriodical()
+  elements = api.all_respone()
+  quizly = api.quiz_response()
+
+  print("Начинаю квест...")
+  storage = []
   question = quizly["question"]
   choices = quizly["choices"]
+  answer = quizly["answer"]
+  if question == "Which element am I?":
+    clues = quizly["clues"]
+    print(clues)
+
   print(question)
   print(choices)
 
-  answer = quizly["answer"]
+  approx_answer = 0
   for element in elements:
-    elements_atomic = element["atomic_number"]
-    # (dodelat otvet)
-  full_answer = []
-  if answer == elements:
-    full_answer = answer
-  trying_to_answer = int(input("Введите атомную массу вашего ответа:"))
-  if answer == trying_to_answer:
-    print("Поздравляю, вы победили! Это действительно был", full_answer)
+    if element["atomic_number"] == answer:
+      atomic_numbera = element["atomic_number"]
+      symbol_numbera = element["symbol"]
+      name_numbera = element["name"]
+      storage.append(name_numbera)
+      storage.append(symbol_numbera)
+      storage.append(atomic_numbera)
+      approx_answer = answer
+      break
+  print("Подсказка:Если не нужен атомный номер, пишите Value вашего ответа.")
+  if approx_answer > 0:
+    trying_to_answer = int(input("Введите атомный номер вашего ответа: "))
+  else:
+    trying_to_answer = input("Введите ваш ответ: ")
+  if approx_answer == trying_to_answer:
+    print("Поздравляю, вы победили! Это действительно был", storage)
   else:
     print("К сожалению нет, правильный ответ был", answer)
 
 
 def daily():
-  response = requests.get('https://api.periodictableofelements.org/elements/element-of-the-day/')   # Запрашиваем дневной элемент.
-  day_element = response.json()
-  print(f'Загружено {len(day_element)} описаний элемента.')
+  api = APIPeriodical
+  day_element = api.daily_element()
   print("Попытка вывести элемент...")
 
   storage = []            # Сохраняем все нужные описания элемента.
@@ -49,15 +81,34 @@ def daily():
 
   print(day_element["date"])
 
+
+def element_finder():
+  response_all = requests.get('https://api.periodictableofelements.org/elements/')
+  elements = response_all.json()
+  print("Если поиск ничего не найдет, вас вернет на главный экран.")
+  elementsts = int(input("Введите атомный номер: "))
+  for element in elements:
+    if element["atomic_number"] == elementsts:
+      sasa = element
+      print(sasa)
+
+
+
 while True:
   print("1 = Квест по элементам.")
   print("2 = Текущий дневной элемент.")
+  print("3 = Поиск элемента по атомному числу.")
   print("Чтобы выйти нажмите любую другую цифру.")
   abbbc = int(input("Введите цифру:"))
   if abbbc == 1:
     quiz()
   elif abbbc == 2:
     daily()
+  elif abbbc == 3:
+    element_finder()
   else:
     print("Выхожу..")
     break
+
+
+
